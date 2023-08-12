@@ -1,0 +1,14 @@
+{
+    "name": "anylist",
+    "version": "1.0.0",
+    "description": "Anylist",
+    "author": "kevdliu",
+    "main": "index.js",
+    "dependencies": {
+        "anylist": "latest",
+        "express": "4.18.2"
+    },
+    "scripts": {
+        "start": "node index.js"
+    }
+}
