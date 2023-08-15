@@ -20,3 +20,6 @@ This addon supports multiple configuration parameters
 *Note on IP filter: The server performs a simple check on whether the IP address of the request origin starts with the specified value. Leave it blank to allow requests from all IPs.
 
 For example, if you specify "192.168.1." as the filter, the server will only allow requests from the 192.168.1.x subnet.
+
+# Credit
+This addon is made possible by the [Anylist library](https://github.com/codetheweb/anylist) created by [@codetheweb](https://github.com/codetheweb)
