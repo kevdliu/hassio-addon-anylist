@@ -6,7 +6,6 @@ const CONTAINER_PORT = 8080;
 const config = require("./data/options.json");
 const EMAIL = config.email;
 const PASSWORD = config.password;
-const LIST = config.list;
 const IP_FILTER = config.ip_filter;
 
 async function initialize(onInitialized) {
@@ -21,9 +20,13 @@ async function initialize(onInitialized) {
     }
 }
 
-async function getItems() {
+async function getItems(listName) {
     return initialize(async (any) => {
-        let list = any.getListByName(LIST);
+        let list = any.getListByName(listName);
+        if (!list) {
+            return null;
+        }
+
         let items = list.items
         return items
             .filter(item => {
@@ -35,27 +38,31 @@ async function getItems() {
     });
 }
 
-async function removeItem(name) {
+async function removeItem(listName, itemName) {
     return initialize(async (any) => {
-        let list = any.getListByName(LIST);
-        let item = list.getItemByName(name);
+        let list = any.getListByName(listName);
+        if (!list) {
+            return 500;
+        }
+
+        let item = list.getItemByName(itemName);
         if (item) {
             await list.removeItem(item);
-            return true;
+            return 200;
         } else {
-            return false;
+            return 304;
         }
     });
 }
 
-function lookupItemCategory(any, listId, name) {
+function lookupItemCategory(any, listId, itemName) {
     let recentItems = any.getRecentItemsByListId(listId);
     if (!recentItems) {
         return null;
     }
 
     let recentItem = recentItems.find((item) => {
-        return item.name.toLowerCase() == name.toLowerCase();
+        return item.name.toLowerCase() == itemName.toLowerCase();
     });
 
     if (!recentItem) {
@@ -65,23 +72,31 @@ function lookupItemCategory(any, listId, name) {
     return recentItem.categoryMatchId;
 }
 
-async function addItem(name) {
+async function addItem(listName, itemName) {
     return initialize(async (any) => {
-        let list = any.getListByName(LIST);
-        let item = list.getItemByName(name);
+        let list = any.getListByName(listName);
+        if (!list) {
+            return 500;
+        }
+
+        let item = list.getItemByName(itemName);
         if (!item) {
-            let category = lookupItemCategory(any, list.identifier, name);
-            let newItem = any.createItem({name: name, categoryMatchId: category});
+            let category = lookupItemCategory(any, list.identifier, itemName);
+            let newItem = any.createItem({name: itemName, categoryMatchId: category});
             list.addItem(newItem);
-            return true;
+            return 200;
         } else if (item.checked) {
             item.checked = false;
             await item.save();
-            return true;
+            return 200;
         } else {
-            return false;
+            return 304;
         }
     });
+}
+
+function getListName(list) {
+    return list || config.list;
 }
 
 function enforceRequestSource(req, res) {
@@ -94,9 +109,7 @@ function enforceRequestSource(req, res) {
         return true;
     }
 
-    res.status(403);
-    res.header("Content-Type", "text/plain");
-    res.send("Forbidden");
+    res.sendStatus(403);
     return false;
 }
 
@@ -108,7 +121,18 @@ app.get("/list", async (req, res) => {
         return;
     }
 
-    let items = await getItems();
+    let listName = getListName(req.query.list);
+    if (!listName) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let items = await getItems(listName);
+    if (items == null) {
+        res.sendStatus(500);
+        return;
+    }
+
     let response = {
         items: items
     };
@@ -125,16 +149,18 @@ app.post("/add", async (req, res) => {
 
     let item = req.body.item;
     if (!item) {
-        res.status(400);
-        res.header("Content-Type", "text/plain");
-        res.send("Bad request");
+        res.sendStatus(400);
         return;
     }
 
-    let added = await addItem(item);
-    res.status(added ? 200 : 304);
-    res.header("Content-Type", "text/plain");
-    res.send(added ? "OK" : "Not modified");
+    let listName = getListName(req.body.list);
+    if (!listName) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let code = await addItem(listName, item);
+    res.sendStatus(code);
 });
 
 app.post("/remove", async (req, res) => {
@@ -144,21 +170,23 @@ app.post("/remove", async (req, res) => {
 
     let item = req.body.item;
     if (!item) {
-        res.status(400);
-        res.header("Content-Type", "text/plain");
-        res.send("Bad request");
+        res.sendStatus(400);
         return;
     }
 
-    let removed = await removeItem(item);
-    res.status(removed ? 200 : 304);
-    res.header("Content-Type", "text/plain");
-    res.send(removed ? "OK" : "Not modified");
+    let listName = getListName(req.body.list);
+    if (!listName) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let code = await removeItem(listName, item);
+    res.sendStatus(code);
 });
 
 function start() {
-    if (!EMAIL || !PASSWORD || !LIST) {
-        console.error("Missing required configuration");
+    if (!EMAIL || !PASSWORD) {
+        console.error("Missing username or password");
         return;
     }
 
