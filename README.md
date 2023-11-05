@@ -10,16 +10,62 @@ To install the addon, you have to first add this repository to your Home Assista
 
 ## Configuration
 This addon supports multiple configuration parameters
-| Name        | Description                                     | Required |
-| ----------- | ----------------------------------------------- | -------- |
-| Email       | Anylist account email                           | Yes      |
-| Password    | Anylist account password                        | Yes      |
-| List        | Name of Anylist list                            | Yes      |
-| IP Filter*  | Allow requests only from specified IP prefix    | No       |
+| Name        | Description                                      | Required |
+| ----------- | ------------------------------------------------ | -------- |
+| Email       | Anylist account email                            | Yes      |
+| Password    | Anylist account password                         | Yes      |
+| List        | Name of Anylist list if not specified in request | No       |
+| IP Filter*  | Allow requests only from specified IP prefix     | No       |
 
 *Note on IP filter: The server performs a simple check on whether the IP address of the request origin starts with the specified value. Leave it blank to allow requests from all IPs.
 
 For example, if you specify "192.168.1." as the filter, the server will only allow requests from the 192.168.1.x subnet.
+
+
+## Usage
+### Adding an item
+Endpoint: POST /add
+
+
+Body: JSON payload.
+| Field | Description      |
+| ----- | ---------------- |
+| item  | Name of the item |
+| list  | Name of the list |
+
+
+Response: 200 if added, 304 if item is already on the list.
+
+
+### Removing an item
+Endpoint: POST /remove
+
+
+Body: JSON payload.
+| Field | Description      |
+| ----- | ---------------- |
+| item  | Name of the item |
+| list  | Name of the list |
+
+
+Response: 200 if removed, 304 if item is not on the list.
+
+
+### Getting items
+Endpoint: GET /list
+
+
+Query Parameters:
+| Field | Description      |
+| ----- | ---------------- |
+| list  | Name of the list |
+
+
+Response: 200 with JSON payload.
+| Field  | Description      |
+| ------ | ---------------- |
+| items  | List of items    |
+
 
 # Credit
 This addon is made possible by the [Anylist library](https://github.com/codetheweb/anylist) created by [@codetheweb](https://github.com/codetheweb)
