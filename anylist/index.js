@@ -2,6 +2,7 @@ const AnyList = require("anylist");
 const express = require("express");
 
 const CONTAINER_PORT = 8080;
+const CREDENTIALS_FILE = "/data/.anylist_credentials";
 
 const config = require("./data/options.json");
 const EMAIL = config.email;
@@ -9,7 +10,7 @@ const PASSWORD = config.password;
 const IP_FILTER = config.ip_filter;
 
 async function initialize(onInitialized) {
-    let any = new AnyList({email: EMAIL, password: PASSWORD});
+    let any = new AnyList({email: EMAIL, password: PASSWORD, credentialsFile: CREDENTIALS_FILE});
     try {
         await any.login();
         await any.getLists();
@@ -18,6 +19,13 @@ async function initialize(onInitialized) {
     } finally {
         any.teardown();
     }
+}
+
+async function getLists() {
+    return initialize(async (any) => {
+        let lists = await any.getLists();
+        return lists.map(list => list.name);
+    });
 }
 
 async function getItems(listName) {
@@ -29,16 +37,17 @@ async function getItems(listName) {
 
         let items = list.items
         return items
-            .filter(item => {
-                return !item.checked
-            })
             .map(item => {
-                return item.name
+                return {
+                    name: item.name,
+                    id: item.identifier,
+                    checked: item.checked || false
+                };
             });
     });
 }
 
-async function removeItem(listName, itemName) {
+async function removeItemByName(listName, itemName) {
     return initialize(async (any) => {
         let list = any.getListByName(listName);
         if (!list) {
@@ -46,6 +55,23 @@ async function removeItem(listName, itemName) {
         }
 
         let item = list.getItemByName(itemName);
+        if (item) {
+            await list.removeItem(item);
+            return 200;
+        } else {
+            return 304;
+        }
+    });
+}
+
+async function removeItemById(listName, itemId) {
+    return initialize(async (any) => {
+        let list = any.getListByName(listName);
+        if (!list) {
+            return 500;
+        }
+
+        let item = list.getItemById(itemId);
         if (item) {
             await list.removeItem(item);
             return 200;
@@ -95,6 +121,53 @@ async function addItem(listName, itemName) {
     });
 }
 
+async function updateItem(listName, itemId, updates) {
+    return initialize(async (any) => {
+        let list = any.getListByName(listName);
+        if (!list) {
+            return 500;
+        }
+
+        let item = list.getItemById(itemId);
+        if (!item) {
+            return 500;
+        }
+
+        if ("name" in updates) {
+            item.name = updates["name"];
+        }
+
+        if ("checked" in updates) {
+            item.checked = updates["checked"];
+        }
+
+        await item.save();
+        return 200;
+    });
+}
+
+async function checkItem(listName, itemName, checked) {
+    return initialize(async (any) => {
+        let list = any.getListByName(listName);
+        if (!list) {
+            return 500;
+        }
+
+        let item = list.getItemByName(itemName);
+        if (!item) {
+            return 500;
+        }
+
+        if (item.checked == checked) {
+            return 304;
+        }
+
+        item.checked = checked;
+        await item.save();
+        return 200;
+    });
+}
+
 function getListName(list) {
     return list || config.list;
 }
@@ -116,7 +189,22 @@ function enforceRequestSource(req, res) {
 const app = express();
 app.use(express.json());
 
-app.get("/list", async (req, res) => {
+app.get("/lists", async (req, res) => {
+    if (!enforceRequestSource(req, res)) {
+        return;
+    }
+
+    let lists = await getLists();
+    let response = {
+        lists: lists
+    };
+
+    res.status(200);
+    res.header("Content-Type", "application/json");
+    res.send(JSON.stringify(response));
+});
+
+app.get("/items", async (req, res) => {
     if (!enforceRequestSource(req, res)) {
         return;
     }
@@ -147,7 +235,7 @@ app.post("/add", async (req, res) => {
         return;
     }
 
-    let item = req.body.item;
+    let item = req.body.name;
     if (!item) {
         res.sendStatus(400);
         return;
@@ -168,9 +256,25 @@ app.post("/remove", async (req, res) => {
         return;
     }
 
-    let item = req.body.item;
-    if (!item) {
+    let listName = getListName(req.body.list);
+    if (!listName) {
         res.sendStatus(400);
+        return;
+    }
+
+    if (req.body.name) {
+        let code = await removeItemByName(listName, req.body.name);
+        res.sendStatus(code);
+    } else if (req.body.id) {
+        let code = await removeItemById(listName, req.body.id);
+        res.sendStatus(code);
+    } else {
+        res.sendStatus(400);
+    }
+});
+
+app.post("/update", async (req, res) => {
+    if (!enforceRequestSource(req, res)) {
         return;
     }
 
@@ -180,7 +284,40 @@ app.post("/remove", async (req, res) => {
         return;
     }
 
-    let code = await removeItem(listName, item);
+    let itemId = req.body.id;
+    if (!itemId) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let code = await updateItem(listName, itemId, req.body);
+    res.sendStatus(code);
+});
+
+app.post("/check", async (req, res) => {
+    if (!enforceRequestSource(req, res)) {
+        return;
+    }
+
+    let listName = getListName(req.body.list);
+    if (!listName) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let itemName = req.body.name;
+    if (!itemName) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let checked = req.body.checked;
+    if (checked === undefined) {
+        res.sendStatus(400);
+        return;
+    }
+
+    let code = await checkItem(listName, itemName, checked);
     res.sendStatus(code);
 });
 
