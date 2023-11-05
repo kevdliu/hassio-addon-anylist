@@ -30,7 +30,7 @@ Endpoint: POST /add
 Body: JSON payload.
 | Field | Description      |
 | ----- | ---------------- |
-| item  | Name of the item |
+| name  | Name of the item |
 | list  | Name of the list |
 
 
@@ -44,15 +44,51 @@ Endpoint: POST /remove
 Body: JSON payload.
 | Field | Description      |
 | ----- | ---------------- |
-| item  | Name of the item |
+| name  | Name of the item |
+| id    | ID of the item   |
 | list  | Name of the list |
 
+
+Note: Either `name` or `id` is required, but not both.
 
 Response: 200 if removed, 304 if item is not on the list.
 
 
+### Updating an item
+Endpoint: POST /update
+
+
+Body: JSON payload.
+| Field   | Description             |
+| ------- | ----------------------- |
+| id      | ID of the item          |
+| name    | New name for the item   |
+| checked | New status for the item |
+| list    | Name of the list        |
+
+
+Note: Either `name` or `checked` is required. Both can be provided in order to update both properties.
+
+Response: 200 if updated.
+
+
+### Check or unchecking an item
+Endpoint: POST /check
+
+
+Body: JSON payload.
+| Field   | Description             |
+| ------- | ----------------------- |
+| name    | Name of the item        |
+| checked | New status for the item |
+| list    | Name of the list        |
+
+
+Response: 200 if updated, 304 if item status is already the same as `checked`.
+
+
 ### Getting items
-Endpoint: GET /list
+Endpoint: GET /items
 
 
 Query Parameters:
@@ -65,6 +101,16 @@ Response: 200 with JSON payload.
 | Field  | Description      |
 | ------ | ---------------- |
 | items  | List of items    |
+
+
+### Getting lists
+Endpoint: GET /lists
+
+
+Response: 200 with JSON payload.
+| Field  | Description      |
+| ------ | ---------------- |
+| lists  | List of lists    |
 
 
 # Credit
