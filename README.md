@@ -1,5 +1,6 @@
 # Home Assistant Addon For Anylist
-This addon allows you to add, remove, and fetch items from your Anylist list using REST APIs.
+This addon allows you to add, remove, and fetch items from your Anylist list using REST APIs. If you're looking for a Home Assistant integration to manage your Anylist lists via intents, service calls, and the [to-do list feature](https://www.home-assistant.io/integrations/todo), you need to also install the [Anylist custom integration](https://github.com/kevdliu/hacs-anylist).
+
 
 ## Installtion
 To install the addon, you have to first add this repository to your Home Assistant addon store. You may do so manually or by clicking the button:
