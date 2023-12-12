@@ -25,14 +25,17 @@ async function initialize(onInitialized) {
 
 async function getLists() {
     return initialize(async (any) => {
-        let lists = await any.getLists();
-        return lists.map(list => list.name);
+        return any.lists.map(list => list.name);
     });
+}
+
+function getListByName(any, name) {
+    return any.lists.find(l => l.name.toUpperCase() === name.toUpperCase());
 }
 
 async function getItems(listName) {
     return initialize(async (any) => {
-        let list = any.getListByName(listName);
+        let list = getListByName(any, listName);
         if (!list) {
             return null;
         }
@@ -51,7 +54,7 @@ async function getItems(listName) {
 
 async function removeItemByName(listName, itemName) {
     return initialize(async (any) => {
-        let list = any.getListByName(listName);
+        let list = getListByName(any, listName);
         if (!list) {
             return 500;
         }
@@ -68,7 +71,7 @@ async function removeItemByName(listName, itemName) {
 
 async function removeItemById(listName, itemId) {
     return initialize(async (any) => {
-        let list = any.getListByName(listName);
+        let list = getListByName(any, listName);
         if (!list) {
             return 500;
         }
@@ -102,7 +105,7 @@ function lookupItemCategory(any, listId, itemName) {
 
 async function addItem(listName, itemName) {
     return initialize(async (any) => {
-        let list = any.getListByName(listName);
+        let list = getListByName(any, listName);
         if (!list) {
             return 500;
         }
@@ -125,7 +128,7 @@ async function addItem(listName, itemName) {
 
 async function updateItem(listName, itemId, updates) {
     return initialize(async (any) => {
-        let list = any.getListByName(listName);
+        let list = getListByName(any, listName);
         if (!list) {
             return 500;
         }
@@ -150,7 +153,7 @@ async function updateItem(listName, itemId, updates) {
 
 async function checkItem(listName, itemName, checked) {
     return initialize(async (any) => {
-        let list = any.getListByName(listName);
+        let list = getListByName(any, listName);
         if (!list) {
             return 500;
         }
