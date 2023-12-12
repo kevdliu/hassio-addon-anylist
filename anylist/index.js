@@ -1,13 +1,15 @@
 const AnyList = require("anylist");
 const express = require("express");
+const minimist = require("minimist");
 
-const CONTAINER_PORT = 8080;
-const CREDENTIALS_FILE = "/data/.anylist_credentials";
+const args = minimist(process.argv.slice(2));
 
-const config = require("./data/options.json");
-const EMAIL = config.email;
-const PASSWORD = config.password;
-const IP_FILTER = config.ip_filter;
+const PORT = args["port"] || process.env.PORT || 8080;
+const EMAIL = args["email"] || process.env.EMAIL;
+const PASSWORD = args["password"] || process.env.PASSWORD;
+const IP_FILTER = args["ip-filter"] || process.env.IP_FILTER;
+const DEFAULT_LIST = args["default-list"] || process.env.DEFAULT_LIST;
+const CREDENTIALS_FILE = args["credentials-file"] || process.env.CREDENTIALS_FILE;
 
 async function initialize(onInitialized) {
     let any = new AnyList({email: EMAIL, password: PASSWORD, credentialsFile: CREDENTIALS_FILE});
@@ -169,7 +171,7 @@ async function checkItem(listName, itemName, checked) {
 }
 
 function getListName(list) {
-    return list || config.list;
+    return list || DEFAULT_LIST;
 }
 
 function enforceRequestSource(req, res) {
@@ -327,12 +329,19 @@ function start() {
         return;
     }
 
-    app.listen(CONTAINER_PORT, "0.0.0.0", () => {
-        let port = process.env.PORT || CONTAINER_PORT;
-        console.log(`Server listening on port ${port}`);
+    app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Server port: ${PORT}`);
 
         if (IP_FILTER) {
-            console.log(`Filtering by IP: ${IP_FILTER}`)
+            console.log(`IP filter: ${IP_FILTER}`);
+        }
+
+        if (DEFAULT_LIST) {
+            console.log(`Default list: ${DEFAULT_LIST}`);
+        }
+
+        if (CREDENTIALS_FILE) {
+            console.log(`Credentials file: ${CREDENTIALS_FILE}`);
         }
     });
 }

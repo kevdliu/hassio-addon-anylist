@@ -2,7 +2,8 @@
 
 set +u
 
-export PORT=$(bashio::addon.port 8080)
+ADDON_PORT=$(bashio::addon.port 8080)
+bashio::log.info "Addon is accepting requests on port $ADDON_PORT"
 
-bashio::log.info "Starting server on port $PORT"
-exec npm run start;
+CONFIG_PATH=/data/options.json
+EMAIL="$(bashio::config 'email')" PASSWORD="$(bashio::config 'password')" IP_FILTER="$(bashio::config 'ip_filter')" DEFAULT_LIST="$(bashio::config 'list')" exec npm run start -- --port 8080 --credentials-file "/data/.anylist_credentials"
