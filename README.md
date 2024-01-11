@@ -29,10 +29,11 @@ Endpoint: POST /add
 
 
 Body: JSON payload.
-| Field | Description      |
-| ----- | ---------------- |
-| name  | Name of the item |
-| list  | Name of the list |
+| Field  | Description        |
+| ------ | ------------------ |
+| name   | Name of the item   |
+| notes  | Notes for the item |
+| list   | Name of the list   |
 
 
 Response: 200 if added, 304 if item is already on the list.
@@ -65,6 +66,7 @@ Body: JSON payload.
 | id      | ID of the item          |
 | name    | New name for the item   |
 | checked | New status for the item |
+| notes   | Notes for the item      |
 | list    | Name of the list        |
 
 
