@@ -29,8 +29,12 @@ async function getLists() {
     });
 }
 
+function normalizeListName(name) {
+    return name.trim().toUpperCase();
+}
+
 function getListByName(any, name) {
-    return any.lists.find(l => l.name.toUpperCase() === name.toUpperCase());
+    return any.lists.find(l => normalizeListName(l.name) === normalizeListName(name));
 }
 
 async function getItems(listName) {
@@ -46,7 +50,8 @@ async function getItems(listName) {
                 return {
                     name: item.name,
                     id: item.identifier,
-                    checked: item.checked || false
+                    checked: item.checked || false,
+                    notes: item.details || ""
                 };
             });
     });
@@ -56,7 +61,7 @@ async function removeItemByName(listName, itemName) {
     return initialize(async (any) => {
         let list = getListByName(any, listName);
         if (!list) {
-            return 500;
+            return 400;
         }
 
         let item = list.getItemByName(itemName);
@@ -73,7 +78,7 @@ async function removeItemById(listName, itemId) {
     return initialize(async (any) => {
         let list = getListByName(any, listName);
         if (!list) {
-            return 500;
+            return 400;
         }
 
         let item = list.getItemById(itemId);
@@ -103,20 +108,37 @@ function lookupItemCategory(any, listId, itemName) {
     return recentItem.categoryMatchId;
 }
 
-async function addItem(listName, itemName) {
+function populateItemUpdates(item, updates) {
+    if ("name" in updates) {
+        item.name = updates["name"];
+    }
+
+    if ("checked" in updates) {
+        item.checked = updates["checked"];
+    }
+
+    if ("notes" in updates) {
+        item.details = updates["notes"];
+    }
+}
+
+async function addItem(listName, itemName, updates) {
     return initialize(async (any) => {
         let list = getListByName(any, listName);
         if (!list) {
-            return 500;
+            return 400;
         }
 
         let item = list.getItemByName(itemName);
         if (!item) {
             let category = lookupItemCategory(any, list.identifier, itemName);
             let newItem = any.createItem({name: itemName, categoryMatchId: category});
+            populateItemUpdates(newItem, updates);
+            newItem.checked = false;
             list.addItem(newItem);
             return 200;
         } else if (item.checked) {
+            populateItemUpdates(item, updates);
             item.checked = false;
             await item.save();
             return 200;
@@ -130,22 +152,15 @@ async function updateItem(listName, itemId, updates) {
     return initialize(async (any) => {
         let list = getListByName(any, listName);
         if (!list) {
-            return 500;
+            return 400;
         }
 
         let item = list.getItemById(itemId);
         if (!item) {
-            return 500;
+            return 400;
         }
 
-        if ("name" in updates) {
-            item.name = updates["name"];
-        }
-
-        if ("checked" in updates) {
-            item.checked = updates["checked"];
-        }
-
+        populateItemUpdates(item, updates);
         await item.save();
         return 200;
     });
@@ -155,12 +170,12 @@ async function checkItem(listName, itemName, checked) {
     return initialize(async (any) => {
         let list = getListByName(any, listName);
         if (!list) {
-            return 500;
+            return 400;
         }
 
         let item = list.getItemByName(itemName);
         if (!item) {
-            return 500;
+            return 400;
         }
 
         if (item.checked == checked) {
@@ -252,7 +267,7 @@ app.post("/add", async (req, res) => {
         return;
     }
 
-    let code = await addItem(listName, item);
+    let code = await addItem(listName, item, req.body);
     res.sendStatus(code);
 });
 
