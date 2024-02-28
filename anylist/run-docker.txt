@@ -1,0 +1,1 @@
+docker run --detach --pull=always --name=anylist -e PORT=9000 -e EMAIL=<Anylist account email> -e PASSWORD=<Anylist account email> -e DEFAULT_LIST=<Optional name of default list> -p 9000:9000 --volume=anylist-data:/data --restart=unless-stopped kevdliu/anylist:latest

@@ -7,7 +7,6 @@ services:
       PORT: 9000
       # EMAIL: <Anylist account email>
       # PASSWORD: <Anylist account password>
-      # IP_FILTER: <Optional IP filter>
       # DEFAULT_LIST: <Optional name of default list>
     volumes:
       - anylist-data:/data
