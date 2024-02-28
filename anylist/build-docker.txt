@@ -1,0 +1,1 @@
+docker build . -t anylist -f .\Dockerfile-generic
