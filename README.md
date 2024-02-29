@@ -2,11 +2,18 @@
 This addon allows you to add, remove, and fetch items from your Anylist list using REST APIs. If you're looking for a Home Assistant integration to manage your Anylist lists via intents, service calls, and the [to-do list feature](https://www.home-assistant.io/integrations/todo), you need to also install the [Anylist custom integration](https://github.com/kevdliu/hacs-anylist).
 
 
-## Installtion
+## Installtion Methods
+
+### Home Assistant Addon
 To install the addon, you have to first add this repository to your Home Assistant addon store. You may do so manually or by clicking the button:
 
 
 [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fkevdliu%2Fhassio-addon-anylist)
+
+
+### Docker Container
+The addon is also available as a docker image. If you prefer to use docker compose, download and import the `docker-compose.yaml` file from the repository. Otherwise, you can also run the container by executing the docker command
+contained inside the `run-docker.txt` file from the repository. In both cases, please make sure to replace the placeholder envrionment variables with your actual values. 
 
 
 ## Configuration
