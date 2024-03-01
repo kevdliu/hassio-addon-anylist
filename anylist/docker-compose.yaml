@@ -1,7 +1,7 @@
 version: "1.0"
 services:
   anylist:
-    image: anylist:latest
+    image: kevdliu/anylist:latest
     container_name: anylist
     environment:
       PORT: 9000
