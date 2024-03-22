@@ -13,14 +13,9 @@ const CREDENTIALS_FILE = args["credentials-file"] || process.env.CREDENTIALS_FIL
 
 async function initialize(onInitialized) {
     let any = new AnyList({email: EMAIL, password: PASSWORD, credentialsFile: CREDENTIALS_FILE});
-    try {
-        await any.login();
-        await any.getLists();
-
-        return await onInitialized(any);
-    } finally {
-        any.teardown();
-    }
+    await any.login(false);
+    await any.getLists();
+    return await onInitialized(any);
 }
 
 async function getLists() {
