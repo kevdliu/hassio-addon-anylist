@@ -130,7 +130,7 @@ async function addItem(listName, itemName, updates) {
             let newItem = any.createItem({name: itemName, categoryMatchId: category});
             populateItemUpdates(newItem, updates);
             newItem.checked = false;
-            list.addItem(newItem);
+            await list.addItem(newItem);
             return 200;
         } else if (item.checked) {
             populateItemUpdates(item, updates);

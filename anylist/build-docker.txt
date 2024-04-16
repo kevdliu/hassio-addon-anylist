@@ -1,1 +1,1 @@
-docker build . -t kevdliu/anylist:latest -t kevdliu/anylist:v1.7.1 -f .\Dockerfile-generic
+docker build . -t kevdliu/anylist:latest -t kevdliu/anylist:v1.7.2 -f .\Dockerfile-generic
