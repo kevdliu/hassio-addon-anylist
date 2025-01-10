@@ -1,1 +1,2 @@
-docker build . -t kevdliu/anylist:latest -t kevdliu/anylist:v1.7.2 -f .\Dockerfile-generic
+docker buildx create --name multi-platform-builder --driver docker-container --use
+docker build --platform=linux/arm64,linux/amd64 -t kevdliu/anylist:latest -t kevdliu/anylist:v1.7.2 -f .\Dockerfile-generic --push --builder multi-platform-builder .
