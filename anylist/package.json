@@ -5,7 +5,7 @@
     "author": "kevdliu",
     "main": "index.js",
     "dependencies": {
-        "anylist": "0.8.3",
+        "anylist": "0.8.5",
         "express": "4.18.2",
         "minimist": "1.2.8"
     },
