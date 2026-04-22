@@ -1,21 +1,14 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+FROM node:18-alpine
 
-ENV LANG C.UTF-8
+WORKDIR /anylist
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+COPY package.json .
+COPY index.js .
 
-RUN set -ex \
-  && apk add --no-cache \
-  nodejs \
-  npm \
-  git
-
-COPY package.json /
-COPY index.js /
 RUN npm install
 
-COPY run.sh /
-RUN chmod a+x /run.sh
+COPY run-generic.sh .
+RUN chmod a+x ./run-generic.sh
 
-CMD [ "/run.sh" ]
+CMD [ "./run-generic.sh" ]
+EXPOSE 9000

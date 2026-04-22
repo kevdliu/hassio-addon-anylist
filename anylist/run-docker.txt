@@ -1,1 +1,9 @@
-docker run --detach --pull=always --name=anylist -e PORT=9000 -e EMAIL=<Anylist account email> -e PASSWORD=<Anylist account email> -e DEFAULT_LIST=<Optional name of default list> -p 9000:9000 --volume=anylist-data:/data --restart=unless-stopped kevdliu/anylist:latest
+# Docker Run Command (Legacy)
+docker run --detach --pull=always --name=anylist -e PORT=9000 -e EMAIL=<Anylist account email> -e PASSWORD=<Anylist account password> -e DEFAULT_LIST=<Optional name of default list> -p 9000:9000 --volume=anylist-data:/data --restart=unless-stopped tdorsey/anylist:latest
+
+# Docker Compose (Recommended)
+# 1. Copy .env.example to .env and configure non-sensitive variables
+# 2. Set EMAIL and PASSWORD as environment variables in your shell:
+#    export EMAIL=your-anylist-email@example.com
+#    export PASSWORD=your-anylist-password
+# 3. Run: docker compose up -d

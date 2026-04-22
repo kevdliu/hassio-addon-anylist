@@ -1,17 +1,21 @@
-version: "1.0"
 services:
   anylist:
-    image: kevdliu/anylist:latest
+    build:
+      context: .
     container_name: anylist
-    environment:
-      PORT: 9000
-      # EMAIL: <Anylist account email>
-      # PASSWORD: <Anylist account password>
-      # DEFAULT_LIST: <Optional name of default list>
+    env_file:
+      - .env
+    secrets:
+      - anylist_password
     volumes:
       - anylist-data:/data
     ports:
       - 9000:9000
     restart: unless-stopped
+
+secrets:
+  anylist_password:
+    environment: "PASSWORD"
+
 volumes:
   anylist-data:
